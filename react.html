@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobConnect - Job Application Tracker</title>
+    <Link rel="stylesheet" href="index.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .app {
+            min-height: 100vh;
+            padding-bottom: 2rem;
+        }
+
+        .app-header {
+            background: white;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .app-header h1 {
+            color: #667eea;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .app-header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        /* Stats Component */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            text-align: center;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card h3 {
+            font-size: 2rem;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* Job Form */
+        .job-form {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .job-form h2 {
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .error {
+            color: #e74c3c;
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+            display: block;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Filter Buttons */
+        .filter-buttons {
+            margin-bottom: 2rem;
+            background: white;
+            padding: 1rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .filter-buttons p {
+            margin-bottom: 0.75rem;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .filters {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .filter-btn:hover {
+            background: #f0f0f0;
+            transform: translateY(-2px);
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+        /* Job List */
+        .job-list {
+            display: grid;
+            gap: 1rem;
+        }
+
+        /* Job Card */
+        .job-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-left: 4px solid;
+            transition: transform 0.3s ease;
+        }
+
+        .job-card:hover {
+            transform: translateX(5px);
+        }
+
+        .job-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .job-card-header h3 {
+            color: #333;
+            margin-bottom: 0.25rem;
+        }
+
+        .role {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .job-card-actions {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .status-select {
+            padding: 0.5rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .btn-delete {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .btn-delete:hover {
+            background: #fee;
+            transform: scale(1.1);
+        }
+
+        .job-card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid #eee;
+        }
+
+        .btn-toggle-details {
+            background: none;
+            border: none;
+            color: #667eea;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .btn-toggle-details:hover {
+            text-decoration: underline;
+        }
+
+        .job-details {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f9f9f9;
+            border-radius: 5px;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            color: #666;
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+        }
+
+        /* Loader */
+        .loader {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #333;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            animation: slideIn 0.3s ease;
+            z-index: 1000;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .job-card-header {
+                flex-direction: column;
+            }
+            
+            .job-card-actions {
+                width: 100%;
+            }
+            
+            .status-select {
+                flex: 1;
+            }
+            
+            .filters {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .app-header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .container {
+                padding: 0 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script src="https://unpkg.com/react@18.2.0/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script type="text/babel">
+        // Custom Hook for localStorage
+        function useLocalStorage(key, initialValue) {
+            const [storedValue, setStoredValue] = React.useState(() => {
+                try {
+                    const item = localStorage.getItem(key);
+                    return item ? JSON.parse(item) : initialValue;
+                } catch (error) {
+                    console.error(error);
+                    return initialValue;
+                }
+            });
+
+            React.useEffect(() => {
+                try {
+                    localStorage.setItem(key, JSON.stringify(storedValue));
+                } catch (error) {
+                    console.error(error);
+                }
+            }, [key, storedValue]);
+
+            return [storedValue, setStoredValue];
+        }
+
+        // Stats Component
+        function Stats({ jobs, onFilterClick }) {
+            const stats = {
+                total: jobs.length,
+                Applied: jobs.filter(j => j.status === 'Applied').length,
+                Interview: jobs.filter(j => j.status === 'Interview').length,
+                Offer: jobs.filter(j => j.status === 'Offer').length,
+                Rejected: jobs.filter(j => j.status === 'Rejected').length
+            };
+
+            const successRate = stats.total > 0 
+                ? ((stats.Offer / stats.total) * 100).toFixed(1)
+                : 0;
+
+            return (
+                <div className="stats">
+                    <div className="stat-card" onClick={() => onFilterClick('all')}>
+                        <h3>📊 {stats.total}</h3>
+                        <p>Total Applications</p>
+                    </div>
+                    <div className="stat-card" onClick={() => onFilterClick('Interview')}>
+                        <h3>📞 {stats.Interview}</h3>
+                        <p>Interviews</p>
+                    </div>
+                    <div className="stat-card" onClick={() => onFilterClick('Offer')}>
+                        <h3>🎉 {stats.Offer}</h3>
+                        <p>Offers</p>
+                    </div>
+                    <div className="stat-card">
+                        <h3>📈 {successRate}%</h3>
+                        <p>Success Rate</p>
+                    </div>
+                </div>
+            );
+        }
+
+        // Job Form Component
+        function JobForm({ onAddJob }) {
+            const [formData, setFormData] = React.useState({
+                company: '',
+                role: '',
+                status: 'Applied'
+            });
+            const [errors, setErrors] = React.useState({});
+
+            const handleChange = (e) => {
+                const { name, value } = e.target;
+                setFormData(prev => ({
+                    ...prev,
+                    [name]: value
+                }));
+                if (errors[name]) {
+                    setErrors(prev => ({ ...prev, [name]: '' }));
+                }
+            };
+
+            const validateForm = () => {
+                const newErrors = {};
+                
+                if (!formData.company.trim()) {
+                    newErrors.company = 'Company name is required';
+                } else if (formData.company.length < 2) {
+                    newErrors.company = 'Company name must be at least 2 characters';
+                }
+                
+                if (!formData.role.trim()) {
+                    newErrors.role = 'Job role is required';
+                } else if (formData.role.length < 2) {
+                    newErrors.role = 'Job role must be at least 2 characters';
+                }
+                
+                setErrors(newErrors);
+                return Object.keys(newErrors).length === 0;
+            };
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                
+                if (validateForm()) {
+                    onAddJob(formData);
+                    setFormData({
+                        company: '',
+                        role: '',
+                        status: 'Applied'
+                    });
+                }
+            };
+
+            return (
+                <form className="job-form" onSubmit={handleSubmit}>
+                    <h2>➕ Add New Application</h2>
+                    
+                    <div className="input-group">
+                        <label>🏢 Company Name *</label>
+                        <input
+                            type="text"
+                            name="company"
+                            value={formData.company}
+                            onChange={handleChange}
+                            placeholder="e.g., Google, Microsoft, Amazon"
+                        />
+                        {errors.company && <span className="error">{errors.company}</span>}
+                    </div>
+                    
+                    <div className="input-group">
+                        <label>💼 Job Role *</label>
+                        <input
+                            type="text"
+                            name="role"
+                            value={formData.role}
+                            onChange={handleChange}
+                            placeholder="e.g., Frontend Developer, Product Manager"
+                        />
+                        {errors.role && <span className="error">{errors.role}</span>}
+                    </div>
+                    
+                    <div className="input-group">
+                        <label>📌 Status</label>
+                        <select name="status" value={formData.status} onChange={handleChange}>
+                            <option value="Applied">📝 Applied</option>
+                            <option value="Interview">📞 Interview</option>
+                            <option value="Offer">🎉 Offer</option>
+                            <option value="Rejected">❌ Rejected</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" className="btn btn-primary">
+                        + Add Application
+                    </button>
+                </form>
+            );
+        }
+
+        // Filter Buttons Component
+        function FilterButtons({ currentFilter, onFilterChange }) {
+            const filters = [
+                { value: 'all', label: 'All', icon: '📋' },
+                { value: 'Applied', label: 'Applied', icon: '📝' },
+                { value: 'Interview', label: 'Interview', icon: '📞' },
+                { value: 'Offer', label: 'Offer', icon: '🎉' },
+                { value: 'Rejected', label: 'Rejected', icon: '❌' }
+            ];
+
+            return (
+                <div className="filter-buttons">
+                    <p>🔍 Filter by status:</p>
+                    <div className="filters">
+                        {filters.map(filter => (
+                            <button
+                                key={filter.value}
+                                className={`filter-btn ${currentFilter === filter.value ? 'active' : ''}`}
+                                onClick={() => onFilterChange(filter.value)}
+                            >
+                                {filter.icon} {filter.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+
+        // Job Card Component
+        function JobCard({ job, onUpdateStatus, onDeleteJob }) {
+            const [showDetails, setShowDetails] = React.useState(false);
+
+            const statusColors = {
+                Applied: '#3498db',
+                Interview: '#f39c12',
+                Offer: '#27ae60',
+                Rejected: '#e74c3c'
+            };
+
+            const handleStatusChange = (e) => {
+                onUpdateStatus(job.id, e.target.value);
+            };
+
+            const formatDate = (dateString) => {
+                if (!dateString) return 'Just now';
+                const date = new Date(dateString);
+                const now = new Date();
+                const diffTime = Math.abs(now - date);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                
+                if (diffDays === 0) return 'Today';
+                if (diffDays === 1) return 'Yesterday';
+                if (diffDays < 7) return `${diffDays} days ago`;
+                return date.toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric',
+                    year: 'numeric'
+                });
+            };
+
+            return (
+                <div className="job-card" style={{ borderLeftColor: statusColors[job.status] }}>
+                    <div className="job-card-header">
+                        <div>
+                            <h3>{job.company}</h3>
+                            <p className="role">{job.role}</p>
+                        </div>
+                        <div className="job-card-actions">
+                            <select 
+                                value={job.status} 
+                                onChange={handleStatusChange}
+                                className="status-select"
+                                style={{ 
+                                    backgroundColor: statusColors[job.status] + '20', 
+                                    color: statusColors[job.status]
+                                }}
+                            >
+                                <option value="Applied">📝 Applied</option>
+                                <option value="Interview">📞 Interview</option>
+                                <option value="Offer">🎉 Offer</option>
+                                <option value="Rejected">❌ Rejected</option>
+                            </select>
+                            <button 
+                                onClick={() => onDeleteJob(job.id)}
+                                className="btn-delete"
+                                aria-label="Delete job"
+                            >
+                                🗑️
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div className="job-card-footer">
+                        <small>📅 Applied: {formatDate(job.createdAt)}</small>
+                        <button 
+                            onClick={() => setShowDetails(!showDetails)}
+                            className="btn-toggle-details"
+                        >
+                            {showDetails ? '▼ Hide Details' : '▶ Show Details'}
+                        </button>
+                    </div>
+                    
+                    {showDetails && (
+                        <div className="job-details">
+                            <p><strong>📋 Application Details:</strong></p>
+                            <p>🏢 Company: {job.company}</p>
+                            <p>💼 Role: {job.role}</p>
+                            <p>📊 Status: {job.status}</p>
+                            <p>📅 Applied on: {new Date(job.createdAt).toLocaleString()}</p>
+                            <p>💡 Tip: Follow up within 2 weeks if no response!</p>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        // Job List Component
+        function JobList({ jobs, onUpdateStatus, onDeleteJob }) {
+            return (
+                <div className="job-list">
+                    {jobs.map(job => (
+                        <JobCard 
+                            key={job.id}
+                            job={job}
+                            onUpdateStatus={onUpdateStatus}
+                            onDeleteJob={onDeleteJob}
+                        />
+                    ))}
+                </div>
+            );
+        }
+
+        // Toast Component
+        function Toast({ message, onClose }) {
+            React.useEffect(() => {
+                const timer = setTimeout(() => {
+                    onClose();
+                }, 3000);
+                return () => clearTimeout(timer);
+            }, [onClose]);
+
+            return (
+                <div className="toast">
+                    {message}
+                </div>
+            );
+        }
+
+        // Main App Component
+        function App() {
+            const [jobs, setJobs] = useLocalStorage('job_applications', []);
+            const [filter, setFilter] = React.useState('all');
+            const [loading, setLoading] = React.useState(true);
+            const [toast, setToast] = React.useState(null);
+
+            React.useEffect(() => {
+                const timer = setTimeout(() => {
+                    setLoading(false);
+                }, 1000);
+                return () => clearTimeout(timer);
+            }, []);
+
+            const showToast = (message) => {
+                setToast(message);
+            };
+
+            const hideToast = () => {
+                setToast(null);
+            };
+
+            const addJob = (newJob) => {
+                const jobWithId = { 
+                    ...newJob, 
+                    id: Date.now(), 
+                    createdAt: new Date().toISOString() 
+                };
+                setJobs([...jobs, jobWithId]);
+                showToast(`✅ Added application for ${newJob.company}`);
+            };
+
+            const updateJobStatus = (id, newStatus) => {
+                const job = jobs.find(j => j.id === id);
+                setJobs(jobs.map(job => 
+                    job.id === id ? { ...job, status: newStatus } : job
+                ));
+                if (job) {
+                    showToast(`📝 Updated ${job.company} status to ${newStatus}`);
+                }
+            };
+
+            const deleteJob = (id) => {
+                const job = jobs.find(j => j.id === id);
+                if (window.confirm(`Are you sure you want to delete ${job?.company} application?`)) {
+                    setJobs(jobs.filter(job => job.id !== id));
+                    if (job) {
+                        showToast(`🗑️ Removed application for ${job.company}`);
+                    }
+                }
+            };
+
+            const filteredJobs = filter === 'all' 
+                ? jobs 
+                : jobs.filter(job => job.status === filter);
+
+            const handleFilterClick = (newFilter) => {
+                setFilter(newFilter);
+                const filterName = newFilter === 'all' ? 'all' : newFilter;
+                showToast(`🔍 Showing ${filterName} applications`);
+            };
+
+            return (
+                <div className="app">
+                    <header className="app-header">
+                        <h1>🎯 JobConnect</h1>
+                        <p>Track your job applications like a pro</p>
+                    </header>
+
+                    <div className="container">
+                        {loading ? (
+                            <div className="loader">
+                                <div className="spinner"></div>
+                                <p>Loading your applications...</p>
+                            </div>
+                        ) : (
+                            <>
+                                <Stats jobs={jobs} onFilterClick={handleFilterClick} />
+                                <JobForm onAddJob={addJob} />
+                                <FilterButtons currentFilter={filter} onFilterChange={handleFilterClick} />
+                                
+                                {jobs.length === 0 ? (
+                                    <div className="empty-state">
+                                        <p>📭 No applications yet. Add your first job application above!</p>
+                                    </div>
+                                ) : filteredJobs.length === 0 ? (
+                                    <div className="empty-state">
+                                        <p>🔍 No applications with status "{filter}". Try a different filter!</p>
+                                    </div>
+                                ) : (
+                                    <JobList 
+                                        jobs={filteredJobs} 
+                                        onUpdateStatus={updateJobStatus}
+                                        onDeleteJob={deleteJob}
+                                    />
+                                )}
+                            </>
+                        )}
+                    </div>
+                    
+                    {toast && <Toast message={toast} onClose={hideToast} />}
+                </div>
+            );
+        }
+
+        // Render the app
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+</body>
+</html>
